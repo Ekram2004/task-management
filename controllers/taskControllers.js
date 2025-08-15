@@ -20,8 +20,8 @@ exports.getTask = async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
         if (!task)
-            return res.status(401).json({ success: false, message: 'task not found' });
-        res.status(200).json({ success: true, data: { task } });
+            return res.status(404).json({ success: false, message: 'task not found' });
+        res.status(200).json({ success: true,message:'Task retrieved successfully' ,data: { task } });
     } catch (err) {
         console.error('fetching task error', err);
         res.status(500).json({ success: false, message: 'fetching task failed', error: err.message });
@@ -31,7 +31,12 @@ exports.getTask = async (req, res) => {
 exports.updateTask = async (req, res) => {
     try {
         const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.status(201).json({ success: 'true', message: 'task updated successfullly', data: { task } });
+
+        if (!task)
+            return res.status(404).json({ success: false, message: 'Task not found' });
+
+
+        res.status(200).json({ success: 'true', message: 'task updated successfullly', data: { task } });
     } catch (err) {
         console.error('updating task error', err);
         res.status(500).json({ success: 'true', message: 'updating task failed', error: err.message });
@@ -41,7 +46,13 @@ exports.updateTask = async (req, res) => {
 exports.deleteTask = async (req, res) => {
     try {
         const task = await Task.findByIdAndDelete(req.params.id);
-        res.status(201).json({ success: true, message: 'task deleted successfully', data: { task } });
+
+        if (!task)
+          return res
+            .status(404)
+            .json({ success: false, message: "Task not found" });
+
+        res.status(200).json({ success: true, message: 'task deleted successfully', data: { task } });
     }
     catch (err) {
         console.error('deleting task error', err);
@@ -51,13 +62,13 @@ exports.deleteTask = async (req, res) => {
 
 exports.getAllTasks = async (req, res) => {
     try {
-        const task = await Task.find();
-        if (!task)
+        const tasks = await Task.find();
+        if (!tasks)
             return res.status(404).json({sucess:false, message:'task not found'})
-        res.status(201).json({ success: true, message: 'geting all tasks successfully', data: { task } });
+        res.status(200).json({ success: true, message: 'Task retrived successfully', data: { tasks } });
     } catch (err) {
         console.error('geting all tasks error', err);
-        res.status(500).json({ success: false, message: 'getting tasks all falied', error: err.message });
+        res.status(500).json({ success: false, message: 'getting all tasks  falied', error: err.message });
     }
 }
 
