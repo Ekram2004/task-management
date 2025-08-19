@@ -57,41 +57,53 @@ exports.getAllTeam = async (req, res) => {
         if (!team)
             return res.status(404).json({ success: false, message: 'team not found ' });
 
-        res.status(200).json({ success: false, message: 'team retrived successfully', data: { team } });
+        res.status(200).json({ success: true, message: 'team retrived successfully', data: { team } });
     } catch (err) {
         console.error('error retriving team');
         res.status(500).json({ sucess: false, message: 'failed to retrive team', error: err.message });
     }
 }
 
-exports.addmemeber = async (req, res) => {
+exports.addMemeber = async (req, res) => {
     try {
         const teamId = req.params.id;
-        const userId = req.body;
+        const {userId} = req.body;
         const team = await Team.findById(teamId);
+        if (!teamId)
+          return res
+            .status(404)
+            .json({ success: false, message: "team not found" });
         const user = await User.findById(userId);
 
-        if (!teamId)
-            return res.status(404).json({ success: false, message: 'team not found' });
-        if (team.members.include(user)) {
+        
+        if (team.members.includes(userId)) {
             res.status(400).json({ success: false, message: 'member is already added' });
         }
-        team.members.push(user);
-        res.status(201).json({ success: true, message: 'member added successfully' });
+        team.members.push(userId);
+        await team.save();
+        res.status(201).json({ success: true, message: 'member added successfully' , data:{team}});
     } catch (err) {
-        console.error('error memeber adding', err);
-        res.status(500).json({ success: false, message: 'failed adding member', error: err.message });
+        console.error("error adding memeber ", err);
+        res.status(500).json({ success: false, message: 'failed to add member', error: err.message });
     }
 }
 
 exports.removeMemeber = async (req, res) => {
     try {
-        const team = await Team.findById(req.params.id);
-        const user = await User.findById(req.body);
+        const teamId = req.params.id;
+        const { userId } = req.body;
+
+        const team = await Team.findById(teamId);
         if (!team)
-            return res.status(404).json({ success: false, message: 'team not found' });
+          return res
+            .status(404)
+                .json({ success: false, message: "team not found" });
+        team.memebers = team.members
+
+        const user = await User.findById(req.body);
         
     } catch {
-        
+        console.error('error removing memeber', err);
+        res.status(500).json({ success: true, message: 'failed to remove member' });
     }
 }
